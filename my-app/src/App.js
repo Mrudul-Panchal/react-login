@@ -30,7 +30,7 @@ app.post("/totp-generate", (request, response, next) => {
     "token": Speakeasy.totp({
       secret: request.body.secret,
       encoding: "base32"
-    })
+    }),
     "remaining": (30 - Math.floor((new Date().getTime() / 1000.0 % 30)))
   });
 });
