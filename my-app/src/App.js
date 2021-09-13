@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, Component} from 'react'
 import './App.css'
 
 import {useSelector} from 'react-redux'
-import {BrowserRouter as Router} from 'react-router-dom'
+import { Link,Switch,Router} from 'react-router-dom'
 
 import {GlobalContext} from './context/globalContext'
 import Routes from './routes/Routes'
@@ -20,7 +20,7 @@ var app = Express();
 app.use(BodyParser.json());
 app.use(BodyParser.urlencoded({ extended: true }));
 
-app.post("/top-secret", (request, response, next) => {
+app.post("/totp-secret", (request, response, next) => {
   var secret = Speakeasy.generateSecret({ length: 20 });
   response.send({"secret": secret.base32 });
 });
@@ -48,7 +48,7 @@ app.post("/totp-validate", (request, response, next) => {
 
 
 
-const App = () => {
+ /*  const App = () => {
 
   const [isLoggedIn, setIsLoggedIn] = useState(
     window.localStorage.getItem('token') !== 'null' &&
@@ -101,6 +101,33 @@ const App = () => {
       </div>
     </Router>
   );
+} */
+
+class App extends Component {
+  render(){
+    return(
+      <Switch>
+        <Route exact path="/" component={A} />
+        <Route exact path="/b" component={B} />
+      </Switch>
+    );
+  }
+}
+
+const A = () => {
+  return(
+    <div>
+      <h1>Component  A</h1>
+    </div>
+  )
+}
+
+const B = () => {
+  return(
+    <div>
+      <h1>Component  B</h1>
+    </div>
+  )
 }
 
 export default App;

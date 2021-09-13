@@ -1,8 +1,7 @@
 import React, {useContext, useState, useEffect} from 'react'
 import {Col, Row} from 'react-bootstrap'
 
-import {CKEditor} from '@ckeditor/ckeditor5-react'
-import CustomEditor from 'ckeditor5-custom-build/build/ckeditor'
+
 import {useDispatch, useSelector} from 'react-redux'
 import {joiResolver} from '@hookform/resolvers/joi'
 import {useForm, Controller} from 'react-hook-form'
