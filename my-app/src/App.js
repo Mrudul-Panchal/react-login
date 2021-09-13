@@ -1,57 +1,105 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import React, {useEffect, useState} from 'react'
+import './App.css'
 
-function App() {
+import {useSelector} from 'react-redux'
+import {BrowserRouter as Router} from 'react-router-dom'
+
+import {GlobalContext} from './context/globalContext'
+import Routes from './routes/Routes'
+
+import {get} from './Utils/AppUtill'
+import {AppProvider} from './state/app'
+import {LOG_IN} from './action/reducer.types'
+
+const Express = require("express");
+const BodyParser = require ("body-parser");
+const Speakeasy = require("speakeasy");
+
+var app = Express();
+
+app.use(BodyParser.json());
+app.use(BodyParser.urlencoded({ extended: true }));
+
+app.post("/top-secret", (request, response, next) => {
+  var secret = Speakeasy.generateSecret({ length: 20 });
+  response.send({"secret": secret.base32 });
+});
+
+app.post("/totp-generate", (request, response, next) => {
+  response.send({
+    "token": Speakeasy.totp({
+      secret: request.body.secret,
+      encoding: "base32"
+    })
+    "remaining": (30 - Math.floor((new Date().getTime() / 1000.0 % 30)))
+  });
+});
+
+app.post("/totp-validate", (request, response, next) => {
+  response.send({
+    "valid": Speakeasy.totp.verify({
+      secret: request.body.secret,
+      encoding: "base32",
+      token: request.body.token,
+      window: 0
+    })
+  })
+});
+
+
+
+const App = () => {
+
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    window.localStorage.getItem('token') !== 'null' &&
+      window.localStorage.getItem('token'),
+  )
+  const [userData, setUserData] = useState(
+    JSON.parse(window.localStorage.getItem('userData') || '{}'),
+  )
+  const [appToken, setAppToken] = useState(
+    window.localStorage.getItem('token'),
+  )
+
+  const setUserInfo = data => {
+    setUserData(data)
+    window.localStorage.setItem('userData', JSON.stringify(data))
+  }
+  const setUserToken = data => {
+    setAppToken(data)
+    window.localStorage.setItem('token', data)
+  }
+
+  const {successLabels = []} = useSelector(state => state.apiReducer)
+  const {loginData = {}} = useSelector(state => state.authReducer)
+
+  useEffect(() => {
+    if (successLabels.includes(LOG_IN)) {
+      setUserInfo(get(['user'], loginData))
+      setUserToken(get(['jwt'], loginData))
+      setIsLoggedIn(true)
+    }
+  }, [loginData, successLabels])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <GlobalContext.Provider
+          value={{
+            isLoggedIn,
+            setIsLoggedIn,
+            setUserInfo,
+            userData,
+            appToken,
+            setUserToken,
+          }}
+        >
+          <AppProvider>
+              <Routes />
+          </AppProvider>
+        </GlobalContext.Provider>
+      </div>
+    </Router>
   );
 }
 
