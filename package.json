@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Mrudul-Panchal/react-login#readme",
   "dependencies": {
+    "axios": "^0.21.4",
     "body-parser": "^1.19.0",
     "ckeditor": "^4.12.1",
     "express": "^4.17.1",
